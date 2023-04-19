@@ -1,5 +1,5 @@
 #[derive(Debug, PartialEq)]
-enum Command {
+pub enum Command {
     Set { key: String, value: String },
     Get { key: String },
 }
@@ -100,18 +100,18 @@ impl Tokenizer {
     }
 }
 
-struct Parser {
+pub struct Parser {
     tokenizer: Tokenizer,
 }
 
 impl Parser {
-    fn new(input: String) -> Parser {
+    pub fn new(input: String) -> Parser {
         Parser {
             tokenizer: Tokenizer::new(input),
         }
     }
 
-    fn parse(&mut self) -> Command {
+    pub fn parse(&mut self) -> Command {
         let token = self.tokenizer.next_token();
         match token {
             Some(Token::Set) => {
@@ -165,9 +165,15 @@ mod test {
     #[test]
     fn tokenizer() {
         let tests = vec![
-            ("set foo bar", vec![Token::Set, Token::value("foo"), Token::value("bar")]),
+            (
+                "set foo bar",
+                vec![Token::Set, Token::value("foo"), Token::value("bar")],
+            ),
             ("get foo", vec![Token::Get, Token::value("foo")]),
-            ("set foo   bar", vec![Token::Set, Token::value("foo"), Token::value("bar")]),
+            (
+                "set foo   bar",
+                vec![Token::Set, Token::value("foo"), Token::value("bar")],
+            ),
             ("get     bar", vec![Token::Get, Token::value("bar")]),
         ];
 
@@ -176,5 +182,5 @@ mod test {
             let tokens = tokenizer.get_all();
             assert_eq!(expected, tokens);
         }
-            }
+    }
 }
