@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+http = "0.2.9"
+httparse = "1.8.0"
+hyper = { version = "0.14.26", features = ["server", "tcp", "http1"] }
+tokio = { version = "1.27.0", features = ["full"] }

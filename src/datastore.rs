@@ -1,22 +1,30 @@
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 pub struct DataStore {
-    data: HashMap<String, String>,
+    data: Mutex<HashMap<String, String>>,
 }
 
 impl DataStore {
     pub fn new() -> DataStore {
         DataStore {
-            data: HashMap::new(),
+            data: Mutex::new(HashMap::new()),
         }
     }
 
-    pub fn set(&mut self, key: &str, value: &str) -> Option<String> {
-        self.data.insert(key.to_string(), value.to_string())
+    pub fn set(&self, key: &str, value: &str) -> Option<String> {
+        self.data.lock().unwrap().insert(key.to_string(), value.to_string())
     }
 
-    pub fn get(&self, key: &str) -> Option<&String> {
-        self.data.get(key)
+    pub fn get(&self, key: &str) -> Option<String> {
+        self.data.lock().unwrap().get(key).map(|s| s.to_string())
+    }
+
+    pub fn execute(&self, command: Command) -> Option<String> {
+        match command {
+            Command::Set { key, value } => self.set(&key, &value),
+            Command::Get { key } => self.get(&key).map(|s| s.to_string()),
+        }
     }
 }
 
@@ -54,9 +62,9 @@ mod test {
 
     #[test]
     fn test_set() {
-        let mut datastore = DataStore::new();
+        let datastore = DataStore::new();
         datastore.set("foo", "bar");
-        assert_eq!(datastore.get("foo"), Some(&"bar".to_string()));
+        assert_eq!(datastore.get("foo"), Some("bar".to_string()));
     }
 
     #[test]
