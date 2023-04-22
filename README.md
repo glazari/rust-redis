@@ -42,4 +42,5 @@ get <key>
 - [ ] add metrics (either statsd or cloudwatch?)
 - [ ] add logging to file
 - [ ] allow using `get` and `set` as keys or values
+- [ ] add auto complete to repl
 
