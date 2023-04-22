@@ -1,9 +1,13 @@
-use std::io::Write;
-use crate::parser;
 use crate::datastore::DataStore;
-use crate::datastore::Command;
+use crate::client::DataStoreClient;
+use crate::datastore::DataStoreService;
+use crate::parser;
+use std::io::Write;
 
-pub fn repl(mut datastore:  DataStore) {
+fn repl<T>(datastore: T)
+where
+    T: DataStoreService,
+{
     let mut counter = 0;
     loop {
         print!("[{}]: ", counter);
@@ -14,18 +18,19 @@ pub fn repl(mut datastore:  DataStore) {
 
         let mut parser = parser::Parser::new(input);
         let command = parser.parse();
-        println!("Parsed: {:?}", command);
-        match command {
-            Command::Set { key, value } => {
-                datastore.set(&key, &value);
-            }
-            Command::Get { key } => {
-                match datastore.get(&key) {
-                    Some(value) => println!("{}: {}", key, value),
-                    None => println!("{} not found", key),
-                }
-            }
-        }
+        //println!("Parsed: {:?}", command);
+        let result = datastore.execute(command);
+        println!("{}", result.unwrap_or("Nil".to_string()));
         counter += 1;
     }
+}
+
+pub fn stand_alone_repl() {
+    let datastore = DataStore::new();
+    repl(datastore);
+}
+
+pub fn repl_with_client(url: &str) {
+    let datastore = DataStoreClient::new(url);
+    repl(datastore);
 }

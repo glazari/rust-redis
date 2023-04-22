@@ -2,6 +2,7 @@ mod datastore;
 mod parser;
 mod repl;
 mod server;
+mod client;
 
 use clap::{Parser, Subcommand};
 
@@ -14,11 +15,16 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    Server { port: u16 },
+    Server { 
+        #[clap(short, long, default_value = "8080")]
+        port: u16 
+    },
     Repl,
+    Client { 
+        #[clap(short, long, default_value = "http://localhost:8080")]
+        url: String 
+    },
 }
-
-
 
 fn main() {
     let args = Args::parse();
@@ -27,20 +33,7 @@ fn main() {
             let options = server::ServerOptions::new(port);
             server::server(options);
         }
-        Commands::Repl => {
-            let datastore = datastore::DataStore::new();
-            repl::repl(datastore);
-        }
+        Commands::Repl => repl::stand_alone_repl(),
+        Commands::Client { url } => repl::repl_with_client(&url),
     }
-    
-}
-
-fn self_standing_server() {
-    let options = server::ServerOptions::new(8080);
-    server::server(options);
-}
-
-fn self_standing_repl() {
-    let datastore = datastore::DataStore::new();
-    repl::repl(datastore);
 }

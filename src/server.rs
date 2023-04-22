@@ -10,6 +10,7 @@ use tokio::runtime::Builder;
 
 use crate::datastore::DataStore;
 use crate::parser;
+use crate::datastore::DataStoreService;
 
 pub struct ServerOptions {
     port: u16,

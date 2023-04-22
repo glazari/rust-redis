@@ -8,14 +8,8 @@ enum Token {
 }
 
 impl Token {
-    fn to_string(&self) -> String {
-        match self {
-            Token::Set => "set".to_string(),
-            Token::Get => "get".to_string(),
-            Token::Value(value) => value.to_string(),
-        }
-    }
 
+    #[cfg(test)]
     fn value(value: &str) -> Token {
         Token::Value(value.to_string())
     }
@@ -65,6 +59,7 @@ impl Tokenizer {
         Some(token)
     }
 
+    #[cfg(test)]
     fn get_all(&mut self) -> Vec<Token> {
         let mut tokens = vec![];
         while let Some(token) = self.next_token() {
@@ -123,10 +118,10 @@ mod test {
     #[test]
     fn test_parses() {
         let tests = vec![
-            ("set foo bar", Command::Set("foo", "bar")),
-            ("get foo", Command::Get("foo")),
-            ("set foo   bar", Command::Set("foo", "bar")),
-            ("get     bar", Command::Get("bar")),
+            ("set foo bar", Command::set("foo", "bar")),
+            ("get foo", Command::get("foo")),
+            ("set foo   bar", Command::set("foo", "bar")),
+            ("get     bar", Command::get("bar")),
         ];
 
         for (input, expected) in tests {
