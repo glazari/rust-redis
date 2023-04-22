@@ -1,30 +1,4 @@
-#[derive(Debug, PartialEq)]
-pub enum Command {
-    Set { key: String, value: String },
-    Get { key: String },
-}
-
-impl Command {
-    fn to_string(&self) -> String {
-        match self {
-            Command::Set { key, value } => format!("set {} {}", key, value),
-            Command::Get { key } => format!("get {}", key),
-        }
-    }
-
-    fn Set(key: &str, value: &str) -> Command {
-        Command::Set {
-            key: key.to_string(),
-            value: value.to_string(),
-        }
-    }
-
-    fn Get(key: &str) -> Command {
-        Command::Get {
-            key: key.to_string(),
-        }
-    }
-}
+use crate::datastore::Command;
 
 #[derive(Debug, PartialEq)]
 enum Token {

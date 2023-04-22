@@ -1,6 +1,8 @@
 mod parser;
 mod repl;
+mod datastore;
 
 fn main() {
-    repl::repl();
+    let datastore = datastore::DataStore::new();
+    repl::repl(datastore);
 }
