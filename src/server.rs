@@ -61,10 +61,13 @@ async fn handle_request(
         (&Method::POST, "/") => {
             let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
             let body_str = String::from_utf8_lossy(&body);
-            println!("POST request body: {}", body_str);
+            println!("POST request body: '{}'", body_str);
             let command = parser::Parser::new(body_str.to_string()).parse();
-            let response = data_store.execute(command);
-            let response_str = response.unwrap_or("Nil".to_string());
+            println!("Parsed: {:?}", command);
+            let response_str = match command {
+                Ok(command) => data_store.execute(command).unwrap_or("Nil".to_string()),
+                Err(msg) => msg,
+            };
             Ok(Response::new(Body::from(response_str + "\n")))
         }
         _ => {

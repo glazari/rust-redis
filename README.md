@@ -32,9 +32,10 @@ get <key>
 ```
 
 ## Todo
-- [ ] Add helpfull error message for syntax errors
 - [ ] Separate into client and serverside
 - [ ] add a list keys command 
 - [ ] add metrics (either statsd or cloudwatch?)
 - [ ] add logging to file
+- [ ] allow using `get` and `set` as keys or values
+- [ ] add increment command
 

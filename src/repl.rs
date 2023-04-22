@@ -19,8 +19,11 @@ where
         let mut parser = parser::Parser::new(input);
         let command = parser.parse();
         //println!("Parsed: {:?}", command);
-        let result = datastore.execute(command);
-        println!("{}", result.unwrap_or("Nil".to_string()));
+        let result_str = match command {
+            Ok(command) => datastore.execute(command).unwrap_or("Nil".to_string()),
+            Err(msg) => format!("(error) {}",msg),
+        };
+        println!("{}", result_str.trim_end());
         counter += 1;
     }
 }

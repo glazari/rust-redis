@@ -8,7 +8,6 @@ enum Token {
 }
 
 impl Token {
-
     #[cfg(test)]
     fn value(value: &str) -> Token {
         Token::Value(value.to_string())
@@ -53,6 +52,7 @@ impl Tokenizer {
         token = match token_str {
             "set" => Token::Set,
             "get" => Token::Get,
+            "" => return None,
             _ => Token::Value(token_str.to_string()),
         };
 
@@ -80,33 +80,36 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Command {
+    pub fn parse(&mut self) -> Result<Command, String> {
         let token = self.tokenizer.next_token();
         match token {
             Some(Token::Set) => {
-                let key = match self.tokenizer.next_token().unwrap() {
-                    Token::Value(key) => key,
-                    _ => panic!("Expected key"),
+                let key = match self.tokenizer.next_token() {
+                    Some(Token::Value(key)) => key,
+                    Some(token) => Err(format!("Set Expected key, got {:?}", token))?,
+                    None => Err("Set Expected key".to_string())?,
                 };
-                let value = match self.tokenizer.next_token().unwrap() {
-                    Token::Value(value) => value,
-                    _ => panic!("Expected value"),
+                let value = match self.tokenizer.next_token() {
+                    Some(Token::Value(value)) => value,
+                    Some(token) => Err(format!("Set Expected value, got {:?}", token))?,
+                    None => Err("Set Expected value".to_string())?,
                 };
-                Command::Set {
+                Ok(Command::Set {
                     key: key.to_string(),
                     value: value.to_string(),
-                }
+                })
             }
             Some(Token::Get) => {
-                let key = match self.tokenizer.next_token().unwrap() {
-                    Token::Value(key) => key,
-                    _ => panic!("Expected key, got {:?}", token),
+                let key = match self.tokenizer.next_token() {
+                    Some(Token::Value(key)) => key,
+                    Some(token) => Err(format!("Get Expected key, got {:?}", token))?,
+                    None => Err("Get Expected key".to_string())?,
                 };
-                Command::Get {
+                Ok(Command::Get {
                     key: key.to_string(),
-                }
+                })
             }
-            _ => panic!("Unknown command"),
+            _ => Err("Unknown command".to_string()),
         }
     }
 }
@@ -118,10 +121,15 @@ mod test {
     #[test]
     fn test_parses() {
         let tests = vec![
-            ("set foo bar", Command::set("foo", "bar")),
-            ("get foo", Command::get("foo")),
-            ("set foo   bar", Command::set("foo", "bar")),
-            ("get     bar", Command::get("bar")),
+            ("set foo bar", Ok(Command::set("foo", "bar"))),
+            ("get foo", Ok(Command::get("foo"))),
+            ("set foo   bar", Ok(Command::set("foo", "bar"))),
+            ("get     bar", Ok(Command::get("bar"))),
+            ("not a command", Err("Unknown command".to_string())),
+            ("set", Err("Set Expected key".to_string())),
+            ("set foo", Err("Set Expected value".to_string())),
+            ("get", Err("Get Expected key".to_string())),
+            ("set foo ", Err("Set Expected value".to_string())),
         ];
 
         for (input, expected) in tests {
@@ -144,6 +152,7 @@ mod test {
                 vec![Token::Set, Token::value("foo"), Token::value("bar")],
             ),
             ("get     bar", vec![Token::Get, Token::value("bar")]),
+            ("set foo ", vec![Token::Set, Token::value("foo")]),
         ];
 
         for (input, expected) in tests {
