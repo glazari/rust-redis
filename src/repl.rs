@@ -1,40 +1,52 @@
-use crate::datastore::DataStore;
 use crate::client::DataStoreClient;
+use crate::datastore::DataStore;
 use crate::datastore::DataStoreService;
 use crate::parser;
-use std::io::Write;
+use rustyline::error::ReadlineError;
+use rustyline::{DefaultEditor, Result};
 
-fn repl<T>(datastore: T)
+fn repl<T>(datastore: T) -> Result<()>
 where
     T: DataStoreService,
 {
+    let mut rl = DefaultEditor::new()?;
+
     let mut counter = 0;
     loop {
-        // color the prompt
-        print!("\x1b[1;32m");
-        print!("[{}]: ", counter);
-        print!("\x1b[0m");
-        // flush to stdout
-        std::io::stdout().flush().unwrap();
-        let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
-
-        let mut parser = parser::Parser::new(input);
-        let command = parser.parse();
-        //println!("Parsed: {:?}", command);
-        let result_str = match command {
-            Ok(command) => match datastore.execute(command) {
-                Ok(result) => match result {
-                    Some(result) => result,
-                    None => "(nil)".to_string(),
-                },
-                Err(msg) => format!("(error) {}", msg),
-            }
-            Err(msg) => format!("(error) {}",msg),
-        };
-        println!("{}", result_str.trim_end());
+        let readline = rl.readline(&format!("\x1b[1;32m[{}]:\x1b[0m ", counter));
         counter += 1;
+        match readline {
+            Ok(line) => {
+                rl.add_history_entry(line.as_str())?;
+                let mut parser = parser::Parser::new(line);
+                let command = parser.parse();
+                let result_str = match command {
+                    Ok(command) => match datastore.execute(command) {
+                        Ok(result) => match result {
+                            Some(result) => result,
+                            None => "(nil)".to_string(),
+                        },
+                        Err(msg) => format!("(error) {}", msg),
+                    },
+                    Err(msg) => format!("(error) {}", msg),
+                };
+                println!("{}", result_str.trim_end());
+            }
+            Err(ReadlineError::Interrupted) => {
+                println!("CTRL-C");
+                break;
+            }
+            Err(ReadlineError::Eof) => {
+                println!("CTRL-D");
+                break;
+            }
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+        }
     }
+    Ok(())
 }
 
 pub fn stand_alone_repl() {
