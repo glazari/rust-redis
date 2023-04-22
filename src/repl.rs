@@ -10,7 +10,10 @@ where
 {
     let mut counter = 0;
     loop {
+        // color the prompt
+        print!("\x1b[1;32m");
         print!("[{}]: ", counter);
+        print!("\x1b[0m");
         // flush to stdout
         std::io::stdout().flush().unwrap();
         let mut input = String::new();

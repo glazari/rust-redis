@@ -24,6 +24,11 @@ In a separate terminal, startup the client repl
 rust-redis client
 ```
 
+There is also a standalone version has the datastore in the same process as the repl. Mostly for debuging.
+```bash 
+rust-redis repl
+```
+
 ## Commands
 
 ```
@@ -31,11 +36,10 @@ set <key> <value>
 get <key>
 ```
 
+
 ## Todo
-- [ ] Separate into client and serverside
 - [ ] add a list keys command 
 - [ ] add metrics (either statsd or cloudwatch?)
 - [ ] add logging to file
 - [ ] allow using `get` and `set` as keys or values
-- [ ] add increment command
 
