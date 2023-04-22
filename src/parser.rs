@@ -4,6 +4,7 @@ use crate::datastore::Command;
 enum Token {
     Set,
     Get,
+    Incr,
     Value(String),
 }
 
@@ -52,6 +53,7 @@ impl Tokenizer {
         token = match token_str {
             "set" => Token::Set,
             "get" => Token::Get,
+            "incr" => Token::Incr,
             "" => return None,
             _ => Token::Value(token_str.to_string()),
         };
@@ -109,7 +111,18 @@ impl Parser {
                     key: key.to_string(),
                 })
             }
-            _ => Err("Unknown command".to_string()),
+            Some(Token::Incr) => {
+                let key = match self.tokenizer.next_token() {
+                    Some(Token::Value(key)) => key,
+                    Some(token) => Err(format!("Incr Expected key, got {:?}", token))?,
+                    None => Err("Incr Expected key".to_string())?,
+                };
+                Ok(Command::Incr {
+                    key: key.to_string(),
+                })
+            }
+            Some(token) => Err(format!("Unknown command {:?}", token)),
+            None => Err("Unknown command".to_string()),
         }
     }
 }

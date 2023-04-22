@@ -65,7 +65,13 @@ async fn handle_request(
             let command = parser::Parser::new(body_str.to_string()).parse();
             println!("Parsed: {:?}", command);
             let response_str = match command {
-                Ok(command) => data_store.execute(command).unwrap_or("Nil".to_string()),
+                Ok(command) => match data_store.execute(command) {
+                    Ok(result) => match result {
+                        Some(result) => result,
+                        None => "(nil)".to_string(),
+                    },
+                    Err(msg) => format!("(error) {}", msg),
+                }
                 Err(msg) => msg,
             };
             Ok(Response::new(Body::from(response_str + "\n")))

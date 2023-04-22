@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 pub trait DataStoreService {
-    fn execute(&self, command: Command) -> Option<String>;
+    fn execute(&self, command: Command) -> Result<Option<String>, String>;
 }
 
 pub struct DataStore {
@@ -29,10 +29,17 @@ impl DataStore {
 }
 
 impl DataStoreService for DataStore {
-    fn execute(&self, command: Command) -> Option<String> {
+    fn execute(&self, command: Command) -> Result<Option<String>, String> {
         match command {
-            Command::Set { key, value } => self.set(&key, &value),
-            Command::Get { key } => self.get(&key).map(|s| s.to_string()),
+            Command::Set { key, value } => Ok(self.set(&key, &value)),
+            Command::Get { key } => Ok(self.get(&key).map(|s| s.to_string())),
+            Command::Incr { key } => {
+                let value = self.get(&key).unwrap_or("0".to_string());
+                let value = value.parse::<i32>().map_err(|e| e.to_string())?;
+                let value = value + 1;
+                self.set(&key, &value.to_string());
+                Ok(Some(value.to_string()))
+            }
         }
     }
 }
@@ -41,6 +48,7 @@ impl DataStoreService for DataStore {
 pub enum Command {
     Set { key: String, value: String },
     Get { key: String },
+    Incr { key: String },
 }
 
 impl Command {
@@ -48,6 +56,7 @@ impl Command {
         match self {
             Command::Set { key, value } => format!("set {} {}", key, value),
             Command::Get { key } => format!("get {}", key),
+            Command::Incr { key } => format!("incr {}", key),
         }
     }
 

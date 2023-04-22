@@ -14,14 +14,14 @@ impl DataStoreClient {
 }
 
 impl DataStoreService for DataStoreClient {
-    fn execute(&self, command: Command) -> Option<String> {
+    fn execute(&self, command: Command) -> Result<Option<String>, String> {
         let client = reqwest::blocking::Client::new();
         let response = client
             .post(&self.url)
             .body(command.to_string())
-            .send()
-            .unwrap();
+            .send().map_err(|e| e.to_string())?;
+            
         let body = response.text().unwrap();
-        Some(body)
+        Ok(Some(body))
     }
 }

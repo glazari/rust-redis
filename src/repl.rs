@@ -20,7 +20,13 @@ where
         let command = parser.parse();
         //println!("Parsed: {:?}", command);
         let result_str = match command {
-            Ok(command) => datastore.execute(command).unwrap_or("Nil".to_string()),
+            Ok(command) => match datastore.execute(command) {
+                Ok(result) => match result {
+                    Some(result) => result,
+                    None => "(nil)".to_string(),
+                },
+                Err(msg) => format!("(error) {}", msg),
+            }
             Err(msg) => format!("(error) {}",msg),
         };
         println!("{}", result_str.trim_end());
