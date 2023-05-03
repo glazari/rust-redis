@@ -1,9 +1,11 @@
 use crate::datastore::Command;
 use crate::datastore::DataStoreService;
 
+#[derive(Clone)]
 pub struct DataStoreClient {
     url: String,
 }
+
 
 impl DataStoreClient {
     pub fn new(url: &str) -> DataStoreClient {

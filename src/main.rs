@@ -3,6 +3,7 @@ mod parser;
 mod repl;
 mod server;
 mod client;
+mod loadtester;
 
 use clap::{Parser, Subcommand};
 
@@ -24,6 +25,13 @@ enum Commands {
         #[clap(short, long, default_value = "http://localhost:8080")]
         url: String 
     },
+    Loadtester { 
+        #[clap(short, long, default_value = "http://localhost:8080")]
+        url: String,
+
+        #[clap(short, long, default_value = "100")]
+        num_requests: usize,
+    },
 }
 
 fn main() {
@@ -35,5 +43,6 @@ fn main() {
         }
         Commands::Repl => repl::stand_alone_repl(),
         Commands::Client { url } => repl::repl_with_client(&url),
+        Commands::Loadtester { url, num_requests } => loadtester::loadtest(&url, num_requests),
     }
 }

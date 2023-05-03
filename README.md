@@ -43,4 +43,5 @@ get <key>
 - [ ] add logging to file
 - [ ] allow using `get` and `set` as keys or values
 - [ ] add auto complete to repl
+- [ ] loadtest application
 

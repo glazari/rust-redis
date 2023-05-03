@@ -24,7 +24,8 @@ impl ServerOptions {
 
 pub fn server(options: ServerOptions) {
     // build tokio runtime
-    Builder::new_current_thread()
+    Builder::new_multi_thread()
+        .worker_threads(4)
         .enable_all()
         .build()
         .unwrap()
@@ -61,9 +62,9 @@ async fn handle_request(
         (&Method::POST, "/") => {
             let body = hyper::body::to_bytes(req.into_body()).await.unwrap();
             let body_str = String::from_utf8_lossy(&body);
-            println!("POST request body: '{}'", body_str);
+            //println!("POST request body: '{}'", body_str);
             let command = parser::Parser::new(body_str.to_string()).parse();
-            println!("Parsed: {:?}", command);
+            //println!("Parsed: {:?}", command);
             let response_str = match command {
                 Ok(command) => match data_store.execute(command) {
                     Ok(result) => match result {
